@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="SkyInsights — interactive airline passenger satisfaction analytics dashboard.">
+<title>SkyInsights | Airline Passenger Analytics</title>
+<style>
+:root{--bg:#071521;--panel:#102536;--panel2:#142d40;--line:#254458;--text:#eaf5fb;--muted:#9bb4c4;--cyan:#54d6ee;--blue:#5599ff;--green:#5cdbb0;--red:#ff8290;--gold:#ffc76a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 75% 0%,#12344a 0,#071521 45%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+header{min-height:280px;position:relative;overflow:hidden;border-bottom:1px solid var(--line);background:linear-gradient(90deg,rgba(4,16,27,.97) 0%,rgba(4,16,27,.82) 48%,rgba(4,16,27,.35) 100%),url('assets/airplane-hero.jpg') center 48%/cover}
+.hero{max-width:1400px;margin:auto;padding:30px 5vw 38px;position:relative;z-index:1}.topline{display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{font-size:13px;letter-spacing:3px;color:var(--cyan);font-weight:800}.live{font-size:11px;border:1px solid #3a7186;border-radius:30px;padding:8px 12px;color:#bceefa;background:#0a2636aa}
+h1{font-size:clamp(32px,5vw,58px);line-height:1.02;margin:48px 0 12px;letter-spacing:-1.8px}.hero p{color:#c2d7e3;max-width:620px;margin:0;font-size:15px;line-height:1.6}.hero strong{color:white}
+main{max-width:1400px;margin:auto;padding:26px 5vw 60px}.toolbar{display:flex;flex-wrap:wrap;align-items:end;gap:12px;margin-bottom:20px}.filter{display:flex;flex-direction:column;gap:7px;min-width:155px}.filter label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}select{background:#102638;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:11px 34px 11px 12px;font-size:13px;outline:none}
+.reset{background:transparent;border:1px solid #3c6178;color:#b9d5e4;padding:11px 16px;border-radius:9px;cursor:pointer}.reset:hover{border-color:var(--cyan);color:white}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin:26px 0 13px;gap:10px}.section-title h2{font-size:16px;letter-spacing:.3px;margin:0}.section-title span{font-size:11px;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.card{background:linear-gradient(145deg,rgba(20,45,64,.96),rgba(12,32,47,.96));border:1px solid var(--line);border-radius:15px;padding:17px;box-shadow:0 12px 30px #0002;min-width:0}.kpi-label{font-size:11px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase}.kpi-value{font-size:clamp(24px,3vw,34px);font-weight:750;margin:10px 0 4px;letter-spacing:-1px}.kpi-note{font-size:11px;color:#9eb7c7}.accent{color:var(--cyan)}.good{color:var(--green)}.warn{color:var(--gold)}
+.grid{display:grid;grid-template-columns:1.25fr 1fr;gap:14px}.chart-card{min-height:300px}.chart-title{font-size:13px;font-weight:700;margin-bottom:4px}.chart-sub{font-size:11px;color:var(--muted);margin-bottom:14px}.chart-wrap{height:225px;position:relative}.chart-wrap canvas{width:100%;height:100%}
+.insights{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.insight{padding:17px;border-radius:13px;background:#0d2535;border:1px solid var(--line)}.insight b{display:block;font-size:13px;margin-bottom:8px}.insight p{font-size:12px;line-height:1.55;color:#b2c8d5;margin:0}.tag{display:inline-block;font-size:10px;color:var(--cyan);border:1px solid #286078;padding:4px 8px;border-radius:30px;margin-bottom:10px}
+footer{border-top:1px solid var(--line);padding:20px 5vw;color:#829cac;font-size:11px;text-align:center}
+.loading{color:var(--muted);padding:30px;text-align:center}.error{color:var(--red);padding:20px}
+@media(max-width:850px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.insights{grid-template-columns:1fr 1fr}.hero{padding-top:22px}h1{margin-top:42px}}
+@media(max-width:520px){main{padding:20px 16px 40px}.hero{padding:22px 18px 32px}.topline{align-items:flex-start}.kpis{gap:9px}.card{padding:13px}.kpi-value{font-size:25px}.insights{grid-template-columns:1fr}.filter{flex:1;min-width:135px}.chart-card{min-height:280px}}
+</style>
+</head>
+<body>
+<header><div class="hero">
+ <div class="topline"><div class="brand">SKYINSIGHTS / DATA INTELLIGENCE</div><div class="live">● INTERACTIVE ANALYTICS</div></div>
+ <h1>Passenger experience,<br><span style="color:var(--cyan)">decoded.</span></h1>
+ <p>Explore the factors shaping airline passenger satisfaction. An end-to-end analytics project covering data preparation, customer experience, operational performance and actionable insights.</p>
+</div></header>
+<main>
+ <div class="section-title"><h2>Explore the data</h2><span id="recordCount">Loading dataset…</span></div>
+ <div class="toolbar">
+  <div class="filter"><label for="travel">Travel type</label><select id="travel"><option value="All">All travel types</option></select></div>
+  <div class="filter"><label for="class">Cabin class</label><select id="class"><option value="All">All classes</option></select></div>
+  <div class="filter"><label for="customer">Customer type</label><select id="customer"><option value="All">All customers</option></select></div>
+  <div class="filter"><label for="gender">Gender</label><select id="gender"><option value="All">All genders</option></select></div>
+  <button class="reset" id="reset">Reset filters ↺</button>
+ </div>
+ <div class="kpis">
+  <div class="card"><div class="kpi-label">Passengers analysed</div><div class="kpi-value accent" id="kTotal">—</div><div class="kpi-note">Records in current selection</div></div>
+  <div class="card"><div class="kpi-label">Satisfaction rate</div><div class="kpi-value good" id="kSat">—</div><div class="kpi-note">Share of satisfied passengers</div></div>
+  <div class="card"><div class="kpi-label">Average flight distance</div><div class="kpi-value" id="kDistance">—</div><div class="kpi-note">Distance units as supplied in source</div></div>
+  <div class="card"><div class="kpi-label">Average arrival delay</div><div class="kpi-value warn" id="kDelay">—</div><div class="kpi-note">Minutes · cleaned dataset</div></div>
+ </div>
+ <div class="section-title"><h2>Passenger satisfaction</h2><span>Live updates with filters</span></div>
+ <div class="grid">
+  <div class="card chart-card"><div class="chart-title">Satisfaction split</div><div class="chart-sub">Satisfied vs dissatisfied passengers</div><div class="chart-wrap"><canvas id="donut"></canvas></div></div>
+  <div class="card chart-card"><div class="chart-title">Satisfaction by cabin class</div><div class="chart-sub">Percentage of passengers satisfied in each class</div><div class="chart-wrap"><canvas id="classChart"></canvas></div></div>
+  <div class="card chart-card"><div class="chart-title">Satisfaction by travel purpose</div><div class="chart-sub">Business travel compared with personal travel</div><div class="chart-wrap"><canvas id="travelChart"></canvas></div></div>
+  <div class="card chart-card"><div class="chart-title">Average service ratings</div><div class="chart-sub">Mean score across service attributes (1–5)</div><div class="chart-wrap"><canvas id="serviceChart"></canvas></div></div>
+ </div>
+ <div class="section-title"><h2>Operational performance</h2><span>Delay distribution in minutes</span></div>
+ <div class="grid">
+  <div class="card chart-card"><div class="chart-title">Departure vs arrival delay</div><div class="chart-sub">Average delay for the current selection</div><div class="chart-wrap"><canvas id="delayChart"></canvas></div></div>
+  <div class="card chart-card"><div class="chart-title">Passenger age profile</div><div class="chart-sub">Number of passengers by age band</div><div class="chart-wrap"><canvas id="ageChart"></canvas></div></div>
+ </div>
+ <div class="section-title"><h2>Business takeaways</h2><span>Insights from the full dataset</span></div>
+ <div class="insights">
+  <div class="insight"><span class="tag">EXPERIENCE</span><b>Wi-Fi is a key improvement area</b><p>Inflight Wi-Fi has the lowest average service rating in this dataset. Improving connectivity may help address a visible customer pain point.</p></div>
+  <div class="insight"><span class="tag">SEGMENTATION</span><b>Travel purpose matters</b><p>Business travellers show substantially higher satisfaction than personal travellers. Review the needs and expectations of leisure customers separately.</p></div>
+  <div class="insight"><span class="tag">CABIN STRATEGY</span><b>Economy has room to improve</b><p>Business-class passengers report higher satisfaction than economy passengers. Prioritise high-impact touchpoints across the economy journey.</p></div>
+ </div>
+ <p id="status" class="loading">Preparing dashboard…</p>
+</main>
+<footer>SKYINSIGHTS · Airline Passenger Satisfaction Analytics · Built with HTML, CSS & JavaScript · Portfolio project</footer>
+<script>
+let rows=[], filtered=[];
+const serviceCols=['Inflight wifi service','Ease of Online booking','Gate location','Departure/Arrival time convenient','Food and drink','Online boarding','Seat comfort','Inflight entertainment','On-board service','Leg room service','Baggage handling','Checkin service','Cleanliness'];
+const shortServices=['Wi-Fi','Online booking','Gate','Time','Food','Boarding','Seat','Entertainment','On-board','Leg room','Baggage','Check-in','Cleanliness'];
+const $=id=>document.getElementById(id);
+function parseCSV(text){const lines=text.trim().split(/\r?\n/);const headers=lines.shift().split(',');return lines.map(line=>{let a=[],v='',q=false;for(let i=0;i<line.length;i++){let c=line[i];if(c==='"'&&line[i+1]==='"'){v+='"';i++}else if(c==='"')q=!q;else if(c===','&&!q){a.push(v);v=''}else v+=c}a.push(v);let o={};headers.forEach((h,i)=>o[h]=a[i]);return o})}
+function n(r,k){return Number(r[k])||0}
+function pct(a,b){return b?100*a/b:0}
+function fmt(v){return Math.round(v).toLocaleString('en-IN')}
+function avg(arr,key){return arr.length?arr.reduce((s,r)=>s+n(r,key),0)/arr.length:0}
+function populate(id,key){let vals=[...new Set(rows.map(r=>r[key]))].sort();vals.forEach(v=>{let o=document.createElement('option');o.value=v;o.textContent=v;$ (id).appendChild(o)})}
+function apply(){filtered=rows.filter(r=>['travel','class','customer','gender'].every(id=>$(id).value==='All'||r[({'travel':'Type of Travel','class':'Class','customer':'Customer Type','gender':'Gender'})[id]]===$(id).value));render()}
+['travel','class','customer','gender'].forEach(id=>$(id).addEventListener('change',apply));
+$('reset').onclick=()=>{['travel','class','customer','gender'].forEach(id=>$(id).value='All');apply()};
+function canvas(id){let c=$(id),ctx=c.getContext('2d'),w=c.clientWidth,h=c.clientHeight,dpr=window.devicePixelRatio||1;c.width=w*dpr;c.height=h*dpr;ctx.scale(dpr,dpr);ctx.clearRect(0,0,w,h);ctx.font='11px system-ui';return {ctx,w,h}}
+function text(ctx,t,x,y,color='#9bb4c4',align='left'){ctx.fillStyle=color;ctx.textAlign=align;ctx.fillText(t,x,y)}
+function barChart(id,labels,values,max,color='#54d6ee',suffix=''){let {ctx,w,h}=canvas(id),left=95,right=35,top=12,bottom=30,usable=h-top-bottom,bw=(w-left-right)/Math.max(labels.length,1);labels.forEach((lab,i)=>{let y=top+i*usable/labels.length+usable/labels.length*.2,hh=Math.min(usable/labels.length*.55,25),v=values[i]||0;ctx.fillStyle='#1c3b50';ctx.fillRect(left,y,w-left-right,hh);ctx.fillStyle=color;ctx.fillRect(left,y,(w-left-right)*v/(max||1),hh);text(ctx,lab,left-9,y+hh*.72,'#b7cbd7','right');text(ctx,`${v.toFixed(1)}${suffix}`,Math.min(left+(w-left-right)*v/(max||1)+6,w-4),y+hh*.72,'#eaf5fb','left')})}
+function verticalBars(id,labels,values,max){let {ctx,w,h}=canvas(id),l=35,r=10,t=15,b=35,ww=w-l-r,hh=h-t-b;[0,.5,1].forEach(p=>{ctx.strokeStyle='#254458';ctx.beginPath();ctx.moveTo(l,t+hh*p);ctx.lineTo(w-r,t+hh*p);ctx.stroke()});let step=ww/labels.length;values.forEach((v,i)=>{let bh=hh*v/(max||1),x=l+i*step+step*.2;ctx.fillStyle='#5599ff';ctx.fillRect(x,t+hh-bh,step*.6,bh);text(ctx,labels[i],x+step*.3,h-10,'#b7cbd7','center');text(ctx,`${v.toFixed(1)}%`,x+step*.3,t+hh-bh-6,'#eaf5fb','center')})}
+function donut(id,sat,total){let {ctx,w,h}=canvas(id),x=w*.35,y=h*.49,r=Math.min(w*.23,h*.36),v=total?sat/total:0;ctx.lineWidth=23;ctx.strokeStyle='#254458';ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#54d6ee';ctx.beginPath();ctx.arc(x,y,r,-Math.PI/2,-Math.PI/2+Math.PI*2*v);ctx.stroke();text(ctx,`${(v*100).toFixed(1)}%`,x,y+4,'#eaf5fb','center');text(ctx,'SATISFIED',x,y+22,'#9bb4c4','center');let lx=w*.64;text(ctx,'Satisfied',lx,h*.38,'#54d6ee');text(ctx,fmt(sat),w-10,h*.38,'#eaf5fb','right');text(ctx,'Dissatisfied',lx,h*.57,'#9bb4c4');text(ctx,fmt(total-sat),w-10,h*.57,'#eaf5fb','right')}
+function render(){let a=filtered,total=a.length,sat=a.filter(r=>r.satisfaction==='Satisfied').length;$('recordCount').textContent=`${fmt(total)} of ${fmt(rows.length)} passengers`; $('kTotal').textContent=fmt(total);$('kSat').textContent=pct(sat,total).toFixed(1)+'%';$('kDistance').textContent=fmt(avg(a,'Flight Distance'));$('kDelay').textContent=avg(a,'Arrival Delay in Minutes').toFixed(1)+' min';
+donut('donut',sat,total);
+let classes=['Business','Eco','Eco Plus'];verticalBars('classChart',classes,classes.map(c=>{let z=a.filter(r=>r.Class===c);return pct(z.filter(r=>r.satisfaction==='Satisfied').length,z.length)}),100);
+let travels=['Business travel','Personal Travel'];verticalBars('travelChart',['Business','Personal'],travels.map(c=>{let z=a.filter(r=>r['Type of Travel']===c);return pct(z.filter(r=>r.satisfaction==='Satisfied').length,z.length)}),100);
+barChart('serviceChart',shortServices,serviceCols.map(c=>avg(a,c)),5);
+barChart('delayChart',['Departure','Arrival'],[avg(a,'Departure Delay in Minutes'),avg(a,'Arrival Delay in Minutes')],Math.max(30,avg(a,'Departure Delay in Minutes'),avg(a,'Arrival Delay in Minutes')),'#ffc76a',' min');
+let bands=['18–25','26–40','41–55','56+'],counts=[0,0,0,0];a.forEach(r=>{let age=n(r,'Age'),i=age<=25?0:age<=40?1:age<=55?2:3;counts[i]++});barChart('ageChart',bands,counts,Math.max(...counts,1),'#5599ff');
+$('status').textContent='Dashboard loaded successfully. Use the filters above to explore passenger segments.';$('status').className='loading'}
+fetch('cleaned_airline_passenger_data.csv').then(r=>{if(!r.ok)throw Error('Could not load CSV');return r.text()}).then(t=>{rows=parseCSV(t);['travel','class','customer','gender'].forEach((id,i)=>populate(id,['Type of Travel','Class','Customer Type','Gender'][i]));apply()}).catch(e=>{$('status').textContent='Dataset could not be loaded. Run this project through a local web server (not by opening the HTML file directly).';$('status').className='error';console.error(e)});
+window.addEventListener('resize',()=>{if(rows.length)render()});
+</script>
+</body></html>
